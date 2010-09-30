@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Jan Kiszka <jan.kiszka@web.de>.
+ * Copyright (C) 2006, 2010 Jan Kiszka <jan.kiszka@web.de>.
  *
  * Based on Xenomai's SMI workaround.
  *
@@ -17,6 +17,7 @@
 #include <sys/io.h>
 
 #include <pci/pci.h>
+#undef PCI_CLASS_CRYPT_ENTERTAINMENT
 #include <linux/pci_ids.h>
 
 #define PMBASE_B0           0x40

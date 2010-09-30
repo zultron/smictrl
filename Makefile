@@ -1,8 +1,9 @@
+KSRC = /lib/modules/$(shell uname -r)/source
 
-CFLAGS = -O2 -Wall
-PCILIB = /usr/lib/libpci.a
+CFLAGS = -O2 -Wall -I $(KSRC)/include
+LDFLAGS = -lz -lpci
 
-smictrl: smictrl.o $(PCILIB) -lz
+smictrl: smictrl.c
 
 clean:
-	rm -f smictrl smictrl.o
+	rm -f smictrl
