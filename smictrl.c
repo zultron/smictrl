@@ -17,8 +17,9 @@
 #include <sys/io.h>
 
 #include <pci/pci.h>
-#undef PCI_CLASS_CRYPT_ENTERTAINMENT
-#include <linux/pci_ids.h>
+
+#define LPC_DEV             31
+#define LPC_FUNC            0
 
 #define PMBASE_B0           0x40
 #define PMBASE_B1           0x41
@@ -40,43 +41,7 @@
 #define BIOS_EN_BIT         (0x01 << 2)
 #define GBL_SMI_EN_BIT      (0x01) /* This is reset by a PCI reset event! */
 
-struct smi_chipset {
-    uint32_t vendor_id;
-    uint32_t device_id;
-    const char *vendor_name;
-    const char *device_name;
-};
-
-#define BUILD_ENTRY(vendor, device) \
-    { vendor, device, (#vendor), (#device) }
-
-const struct smi_chipset chipset_table[] = {
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801AA_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801AB_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801BA_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801BA_10),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801E_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801CA_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801CA_12),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801DB_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801DB_12),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82801EB_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH6_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH6_1),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH6_2),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ESB2_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH7_0),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH7_1),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH8_4),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH9_1),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH9_5),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH10_1),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_5_3400_SERIES_LPC_MIN+7),
-    BUILD_ENTRY(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_MIN+13),
-    { 0, 0, NULL, NULL }
-};
-
-uint16_t get_smi_en_addr(struct pci_dev *dev)
+static uint16_t get_smi_en_addr(struct pci_dev *dev)
 {
     uint8_t byte0, byte1;
 
@@ -86,25 +51,15 @@ uint16_t get_smi_en_addr(struct pci_dev *dev)
     return SMI_CTRL_ADDR + (((byte1 << 1) | (byte0 >> 7)) << 7); // bits 7-15
 }
 
-int match_device(struct pci_dev *dev)
-{
-    int i;
-
-    for (i = 0; chipset_table[i].vendor_name; i++)
-        if (dev->vendor_id == chipset_table[i].vendor_id &&
-            dev->device_id == chipset_table[i].device_id)
-            return i;
-
-    return -1;
-}
-
 int main(int argc, char *argv[])
 {
+    char vendor_name[128];
+    char device_name[128];
     struct pci_access *pacc;
     struct pci_dev *dev;
     uint16_t smi_en_addr;
     uint32_t new_value = 0;
-    int idx, c, set_value = 0;
+    int c, set_value = 0;
 
     while ((c = getopt(argc,argv,"s:")) != EOF)
         switch (c) {
@@ -131,13 +86,18 @@ int main(int argc, char *argv[])
     for (dev = pacc->devices; dev; dev = dev->next) {
         pci_fill_info(dev, PCI_FILL_IDENT | PCI_FILL_BASES);
 
-        idx = match_device(dev);
-        if (idx < 0)
+        if (dev->vendor_id != PCI_VENDOR_ID_INTEL ||
+            dev->device_class != PCI_CLASS_BRIDGE_ISA ||
+            dev->dev != LPC_DEV || dev->func != LPC_FUNC)
             continue;
 
-        printf("SMI-enabled chipset found:\n %s:%s (%04x:%04x)\n",
-               chipset_table[idx].vendor_name, chipset_table[idx].device_name,
-               dev->vendor_id, dev->device_id);
+        pci_lookup_name(pacc, vendor_name, sizeof(vendor_name),
+                        PCI_LOOKUP_VENDOR, dev->vendor_id);
+        pci_lookup_name(pacc, device_name, sizeof(device_name),
+                        PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
+
+        printf("SMI-enabled chipset found:\n %s %s (%04x:%04x)\n",
+               vendor_name, device_name, dev->vendor_id, dev->device_id);
 
         smi_en_addr = get_smi_en_addr(dev);
 
