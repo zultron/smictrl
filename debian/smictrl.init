@@ -34,7 +34,7 @@ if [ -n "$SET_BITS" ]; then
     SMICTRL_OPTIONS="SMICTRL_OPTIONS -s $SET_BITS"
 fi
 
-if [ -z "$SMICTRL_OPTIONS"]; then
+if [ -z "$SMICTRL_OPTIONS" ]; then
     # No options set; exit gracefully
     exit0
 fi
