@@ -1,0 +1,57 @@
+#!/bin/sh
+#                                              -*-shell-script-*-
+### BEGIN INIT INFO
+# Provides:       smictrl
+# Required-Start:
+# Required-Stop:
+# Default-Start:  2 3 4 5
+# Default-Stop:
+# Short-Description: set/clear SMI register bits
+# Description: Sets and clears SMI register flags
+#	that may interfere with real-time operation
+### END INIT INFO
+# 
+
+DESC="SMI Control"
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+SMICTRL=/usr/bin/smictrl
+
+# use lsb-base
+. /lib/lsb/init-functions
+
+[ -x $SMICTRL ] || exit 0
+
+if [ -f /etc/default/smictrl ] ; then
+	. /etc/default/smictrl
+fi
+
+if [ -n "$CLEAR_BITS" ]; then
+    SMICTRL_OPTIONS="SMICTRL_OPTIONS -c $CLEAR_BITS"
+fi
+
+if [ -n "$SET_BITS" ]; then
+    SMICTRL_OPTIONS="SMICTRL_OPTIONS -s $SET_BITS"
+fi
+
+if [ -z "$SMICTRL_OPTIONS"]; then
+    # No options set; exit gracefully
+    exit0
+fi
+
+case "$1" in
+	start|force-reload|restart|reload)
+		log_action_begin_msg "$DESC: Setting smictrl bits"
+		$SMICTRL $SMICTRL_OPTIONS 2>&1 >/dev/null
+		RETVAL=$?
+		log_action_end_msg $RETVAL ""
+		;;
+	stop)
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|reload|force-reload}"
+		exit 1
+esac
+
+exit 0
+

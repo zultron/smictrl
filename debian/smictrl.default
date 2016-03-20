@@ -1,0 +1,9 @@
+# Options to pass to smictrl
+
+# See a list of values from `smictrl -h`
+
+# Bits to clear: `smictrl -c $CLEAR_BITS`
+#CLEAR_BITS="0x00000000"
+
+# Bits to set: `smictrl -s $SET_BITS`
+#SET_BITS="0x00000000"

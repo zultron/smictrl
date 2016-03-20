@@ -1,2 +1,5 @@
 /files
-/smictrl*
+/smictrl/
+/smictrl.debhelper.log
+/smictrl.substvars
+/smictrl.*.debhelper
