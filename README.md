@@ -9,5 +9,5 @@ Morris's Debian packaging with init scripts for running at system
 boot.
 
 [jan-git]: http://git.kiszka.org/?p=smictrl.git
-[lcnc-smi]: http://wiki.linuxcnc.org/cgi-bin/wiki.pl?FixingSMIIssues
+[lcnc-smi]: http://wiki.linuxcnc.org/cgi-bin/wiki.pl?FixingSMIIssues#Alternate_Approach_smictrl
 [marty-changes]: http://wiki.linuxcnc.org/uploads/smictrl.c
