@@ -1,0 +1,12 @@
+Source: smictrl
+Section: admin
+Priority: optional
+Maintainer: John Morris <john@zultron.com>
+Build-Depends: debhelper (>= 7), libpci-dev
+Standards-Version: 3.9.1
+Homepage: http://git.kiszka.org/?p=smictrl.git
+
+Package: smictrl
+Architecture: amd64 i386
+Depends: libpci3
+Description: SMI enable register manipulation tool

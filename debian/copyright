@@ -1,0 +1,12 @@
+Author: Jan Kiszka <jan.kiszka@web.de>
+Download: http://git.kiszka.org/?p=smictrl.git;a=snapshot;h=HEAD;sf=tgz
+
+Files: *
+Copyright: (C) 2006, 2010 Jan Kiszka <jan.kiszka@web.de>
+License: GPLv2+
+
+Files: debian/*
+Copyright: (C) 2013 John Morris <repos@zultron.com>
+License: PD
+ The Debian packaging is hereby placed in the public domain (no rights
+ reserved).

@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+
+KSRC=$(shell /bin/ls -d /usr/src/linux-headers* | tail -1)
+
+build:
+	dh_testdir
+	dh_auto_configure
+	gcc -O2 -Wall -I$(KSRC)/include -o smictrl smictrl.c -lz -lpci
+	dh_auto_test
+
+install: build
+	dh_testroot
+	dh_prep
+	dh_installdirs
+	dh_install smictrl usr/bin
+	dh_installdocs
+	dh_installchangelogs
+	dh_installdebconf
+	dh_compress
+	dh_fixperms
+
+binary-arch: install
+
+binary: binary-arch
+
+%:
+	dh $@
+

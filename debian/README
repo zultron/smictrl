@@ -1,0 +1,18 @@
+smictrl Debian packaging
+
+smictrl is an SMI enable register manipulation tool by Jan Kiszka
+
+It is used to disable system management interrupts on some x86
+chipsets that can cause unacceptably high latency spikes in real-time
+applications.
+
+To build:
+
+# clone Jan's smictrl repo & cd into it
+git clone git://git.kiszka.org/smictrl.git && cd smictrl
+# clone this repo
+git clone git://github.com/zultron/smictrl-deb.git debian
+# build the package
+fakeroot dpkg-buildpackage -uc -us
+# install packages in parent directory
+sudo dpkg -i ../smictrl_*.deb
